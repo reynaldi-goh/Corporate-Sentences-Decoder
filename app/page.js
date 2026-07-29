@@ -7,11 +7,15 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [inputRevealed, setInputRevealed] = useState(true);
+  const [revealed, setRevealed] = useState(false);
 
   const handleTranslate = async () => {
     if (!input.trim()) return;
     setLoading(true);
     setOutput("");
+    setRevealed(false);
+    setInputRevealed(true); // add this line
 
     try {
       const res = await fetch("/api/translate", {
@@ -79,9 +83,19 @@ export default function Home() {
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Input */}
         <div className="bg-white rounded-xl shadow p-4 flex flex-col">
-          <span className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-            {direction === "toHuman" ? "LinkedIn Speak" : "Plain Human"}
-          </span>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+              {direction === "toHuman" ? "LinkedIn Speak" : "Plain Human"}
+            </span>
+            {input && (
+              <button
+                onClick={() => setInputRevealed((prev) => !prev)}
+                className="text-xs font-medium text-[#0A66C2] hover:underline"
+              >
+                {inputRevealed ? "Hide 🙈" : "Reveal 👀"}
+              </button>
+            )}
+          </div>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -90,7 +104,9 @@ export default function Home() {
                 ? "e.g. I am thrilled to have initiated my first culinary transformation journey..."
                 : "e.g. I cooked for the first time."
             }
-            className="flex-1 min-h-[160px] resize-none outline-none text-gray-800 placeholder-gray-400"
+            className={`flex-1 min-h-[160px] resize-none outline-none text-gray-800 placeholder-gray-400 transition ${
+              input && !inputRevealed ? "blur-md select-none" : ""
+            }`}
           />
           <button
             onClick={handleTranslate}
@@ -103,10 +119,24 @@ export default function Home() {
 
         {/* Output */}
         <div className="bg-white rounded-xl shadow p-4 flex flex-col">
-          <span className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-            {direction === "toHuman" ? "Plain Human" : "LinkedIn Speak"}
-          </span>
-          <div className="flex-1 min-h-[160px] text-gray-800 whitespace-pre-wrap">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+              {direction === "toHuman" ? "Plain Human" : "LinkedIn Speak"}
+            </span>
+            {output && (
+              <button
+                onClick={() => setRevealed((prev) => !prev)}
+                className="text-xs font-medium text-[#0A66C2] hover:underline"
+              >
+                {revealed ? "Hide 🙈" : "Reveal 👀"}
+              </button>
+            )}
+          </div>
+          <div
+            className={`flex-1 min-h-[160px] text-gray-800 whitespace-pre-wrap transition ${
+              output && !revealed ? "blur-md select-none" : ""
+            }`}
+          >
             {output || (
               <span className="text-gray-300">
                 Translation will appear here...
@@ -115,7 +145,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
       <p className="text-xs text-gray-400 mt-8">
         Powered by Groq · Not affiliated with LinkedIn
       </p>
